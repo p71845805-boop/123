@@ -1,0 +1,555 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- ===================================================================
+-- THEME CONFIGURATION
+-- ===================================================================
+local theme = {
+    Background = Color3.fromRGB(18, 18, 22),
+    GroupBackground = Color3.fromRGB(24, 24, 28),
+    Border = Color3.fromRGB(50, 50, 60),
+    Accent = Color3.fromRGB(219, 79, 57),
+    Text = Color3.fromRGB(235, 235, 240),
+    TextDim = Color3.fromRGB(130, 130, 140),
+    Enabled = Color3.fromRGB(80, 200, 120),
+    Disabled = Color3.fromRGB(200, 80, 80)
+}
+
+-- ===================================================================
+-- MAIN GUI SETUP
+-- ===================================================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "WeaponSystemGUI"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
+
+-- Toggle key
+local GUIVisible = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.F9 then
+        GUIVisible = not GUIVisible
+        mainWindow.Visible = GUIVisible
+    end
+end)
+
+local mainWindow = Instance.new("Frame")
+mainWindow.Name = "MainWindow"
+mainWindow.Size = UDim2.new(0, 520, 0, 380)
+mainWindow.Position = UDim2.new(0.5, -260, 0.5, -190)
+mainWindow.BackgroundColor3 = theme.Background
+mainWindow.BorderSizePixel = 0
+mainWindow.Active = true
+mainWindow.Parent = screenGui
+
+-- Corner radius
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = mainWindow
+
+-- Shadow
+local shadow = Instance.new("ImageLabel")
+shadow.Name = "Shadow"
+shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+shadow.BackgroundTransparency = 1
+shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+shadow.Size = UDim2.new(1, 40, 1, 40)
+shadow.ZIndex = -1
+shadow.Image = "rbxassetid://5554236805"
+shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+shadow.ImageTransparency = 0.6
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(20, 20, 280, 280)
+shadow.Parent = mainWindow
+
+-- Top bar
+local topBar = Instance.new("Frame")
+topBar.Name = "TopBar"
+topBar.Size = UDim2.new(1, 0, 0, 36)
+topBar.BackgroundColor3 = theme.GroupBackground
+topBar.BorderSizePixel = 0
+topBar.Parent = mainWindow
+
+local topCorner = Instance.new("UICorner")
+topCorner.CornerRadius = UDim.new(0, 6)
+topCorner.Parent = topBar
+
+-- Fix corners
+local fix = Instance.new("Frame")
+fix.Size = UDim2.new(1, 0, 0, 10)
+fix.Position = UDim2.new(0, 0, 1, -10)
+fix.BackgroundColor3 = theme.GroupBackground
+fix.BorderSizePixel = 0
+fix.Parent = topBar
+
+-- Accent line
+local accentLine = Instance.new("Frame")
+accentLine.Size = UDim2.new(1, 0, 0, 2)
+accentLine.BackgroundColor3 = theme.Accent
+accentLine.BorderSizePixel = 0
+accentLine.Parent = topBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0, 200, 1, 0)
+title.Position = UDim2.new(0, 15, 0, 0)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.Text = "WEAPON SYSTEM"
+title.TextColor3 = theme.Text
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = topBar
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0, 200, 0, 14)
+subtitle.Position = UDim2.new(0, 15, 0.5, 0)
+subtitle.BackgroundTransparency = 1
+subtitle.Font = Enum.Font.Gotham
+subtitle.Text = "v2.0 | Premium"
+subtitle.TextColor3 = theme.Accent
+subtitle.TextSize = 10
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = topBar
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 3)
+closeBtn.BackgroundTransparency = 1
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.Text = "×"
+closeBtn.TextColor3 = theme.TextDim
+closeBtn.TextSize = 20
+closeBtn.Parent = topBar
+
+closeBtn.MouseButton1Click:Connect(function()
+    GUIVisible = false
+    mainWindow.Visible = false
+end)
+
+-- Draggable
+local dragging, dragStart, startPos
+topBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainWindow.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        mainWindow.Position = UDim2.new(
+            startPos.Width.Scale, 
+            startPos.Width.Offset + delta.X,
+            startPos.Height.Scale,
+            startPos.Height.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- ===================================================================
+-- TAB SYSTEM
+-- ===================================================================
+local tabsContainer = Instance.new("Frame")
+tabsContainer.Name = "Tabs"
+tabsContainer.Size = UDim2.new(1, -20, 0, 32)
+tabsContainer.Position = UDim2.new(0, 10, 0, 46)
+tabsContainer.BackgroundTransparency = 1
+tabsContainer.Parent = mainWindow
+
+local tabsLayout = Instance.new("UIListLayout")
+tabsLayout.FillDirection = Enum.FillDirection.Horizontal
+tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabsLayout.Padding = UDim.new(0, 6)
+tabsLayout.Parent = tabsContainer
+
+local pages = {}
+local tabButtons = {}
+
+local function createTab(name, icon)
+    local btn = Instance.new("TextButton")
+    btn.Name = name.."Tab"
+    btn.Size = UDim2.new(0, 100, 1, 0)
+    btn.BackgroundColor3 = theme.GroupBackground
+    btn.BorderColor3 = theme.Border
+    btn.BorderSizePixel = 1
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Text = "  "..name
+    btn.TextColor3 = theme.TextDim
+    btn.TextSize = 12
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.Parent = tabsContainer
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 4)
+    btnCorner.Parent = btn
+    
+    local indicator = Instance.new("Frame")
+    indicator.Name = "Indicator"
+    indicator.Size = UDim2.new(0, 3, 0.6, 0)
+    indicator.Position = UDim2.new(0, 0, 0.2, 0)
+    indicator.BackgroundColor3 = theme.Accent
+    indicator.BorderSizePixel = 0
+    indicator.Visible = false
+    indicator.Parent = btn
+    
+    local indCorner = Instance.new("UICorner")
+    indCorner.CornerRadius = UDim.new(0, 2)
+    indCorner.Parent = indicator
+    
+    local page = Instance.new("ScrollingFrame")
+    page.Name = name.."Page"
+    page.Size = UDim2.new(1, -20, 1, -90)
+    page.Position = UDim2.new(0, 10, 0, 84)
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel = 0
+    page.ScrollBarThickness = 2
+    page.ScrollBarImageColor3 = theme.Accent
+    page.Visible = false
+    page.Parent = mainWindow
+    
+    pages[name] = page
+    tabButtons[name] = {Button = btn, Indicator = indicator}
+    
+    btn.MouseButton1Click:Connect(function()
+        for n, p in pairs(pages) do
+            p.Visible = (n == name)
+            local elems = tabButtons[n]
+            elems.Button.TextColor3 = (n == name) and theme.Text or theme.TextDim
+            elems.Button.BorderColor3 = (n == name) and theme.Accent or theme.Border
+            elems.Indicator.Visible = (n == name)
+        end
+    end)
+    
+    return page
+end
+
+-- ===================================================================
+-- UI COMPONENTS
+-- ===================================================================
+local function createToggle(parent, text, default, callback, order)
+    local container = Instance.new("Frame")
+    container.Name = text.."Toggle"
+    container.Size = UDim2.new(1, -10, 0, 34)
+    container.BackgroundTransparency = 1
+    container.LayoutOrder = order or 1
+    container.Parent = parent
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -60, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Gotham
+    label.Text = text
+    label.TextColor3 = theme.Text
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+    
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Name = "Toggle"
+    toggleBtn.Size = UDim2.new(0, 44, 0, 22)
+    toggleBtn.Position = UDim2.new(1, -50, 0.5, -11)
+    toggleBtn.BackgroundColor3 = default and theme.Enabled or theme.Disabled
+    toggleBtn.BorderSizePixel = 0
+    toggleBtn.AutoButtonColor = false
+    toggleBtn.Text = ""
+    toggleBtn.Parent = container
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(1, 0)
+    toggleCorner.Parent = toggleBtn
+    
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 18, 0, 18)
+    knob.Position = UDim2.new(0, default and 24 or 2, 0.5, -9)
+    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    knob.BorderSizePixel = 0
+    knob.Parent = toggleBtn
+    
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = knob
+    
+    local enabled = default
+    
+    local function update()
+        enabled = not enabled
+        local targetPos = enabled and UDim2.new(0, 24, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+        local targetColor = enabled and theme.Enabled or theme.Disabled
+        
+        game:GetService("TweenService"):Create(knob, TweenInfo.new(0.2), {Position = targetPos}):Play()
+        game:GetService("TweenService"):Create(toggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+        
+        callback(enabled)
+    end
+    
+    toggleBtn.MouseButton1Click:Connect(update)
+    
+    return {
+        Set = function(val)
+            if enabled ~= val then update() end
+        end,
+        Get = function() return enabled end
+    }
+end
+
+local function createSlider(parent, text, min, max, default, callback, order)
+    local container = Instance.new("Frame")
+    container.Name = text.."Slider"
+    container.Size = UDim2.new(1, -10, 0, 50)
+    container.BackgroundTransparency = 1
+    container.LayoutOrder = order or 1
+    container.Parent = parent
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -50, 0, 20)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Gotham
+    label.Text = text
+    label.TextColor3 = theme.Text
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+    
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Size = UDim2.new(0, 40, 0, 20)
+    valueLabel.Position = UDim2.new(1, -40, 0, 0)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.Text = tostring(default)
+    valueLabel.TextColor3 = theme.Accent
+    valueLabel.TextSize = 12
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Parent = container
+    
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Name = "Background"
+    sliderBg.Size = UDim2.new(1, 0, 0, 6)
+    sliderBg.Position = UDim2.new(0, 0, 0, 32)
+    sliderBg.BackgroundColor3 = theme.Border
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Parent = container
+    
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(1, 0)
+    bgCorner.Parent = sliderBg
+    
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Name = "Fill"
+    sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    sliderFill.BackgroundColor3 = theme.Accent
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBg
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = sliderFill
+    
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 14, 0, 14)
+    knob.Position = UDim2.new((default - min) / (max - min), -7, 0.5, -7)
+    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    sliderFill.BorderSizePixel = 0
+    knob.Parent = sliderBg
+    
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = knob
+    
+    local dragging = false
+    
+    local function update(input)
+        local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+        local value = math.floor(min + (max - min) * pos)
+        
+        sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        knob.Position = UDim2.new(pos, -7, 0.5, -7)
+        valueLabel.Text = tostring(value)
+        
+        callback(value)
+    end
+    
+    sliderBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            update(input)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            update(input)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    return container
+end
+
+local function createDropdown(parent, text, options, default, callback, order)
+    local container = Instance.new("Frame")
+    container.Name = text.."Dropdown"
+    container.Size = UDim2.new(1, -10, 0, 60)
+    container.BackgroundTransparency = 1
+    container.LayoutOrder = order or 1
+    container.Parent = parent
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Gotham
+    label.Text = text
+    label.TextColor3 = theme.Text
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+    
+    local dropdownBtn = Instance.new("TextButton")
+    dropdownBtn.Size = UDim2.new(1, 0, 0, 28)
+    dropdownBtn.Position = UDim2.new(0, 0, 0, 24)
+    dropdownBtn.BackgroundColor3 = theme.GroupBackground
+    dropdownBtn.BorderColor3 = theme.Border
+    dropdownBtn.BorderSizePixel = 1
+    dropdownBtn.Font = Enum.Font.Gotham
+    dropdownBtn.Text = "  "..default
+    dropdownBtn.TextColor3 = theme.Text
+    dropdownBtn.TextSize = 12
+    dropdownBtn.TextXAlignment = Enum.TextXAlignment.Left
+    dropdownBtn.Parent = container
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 4)
+    btnCorner.Parent = dropdownBtn
+    
+    local arrow = Instance.new("TextLabel")
+    arrow.Size = UDim2.new(0, 20, 1, 0)
+    arrow.Position = UDim2.new(1, -25, 0, 0)
+    arrow.BackgroundTransparency = 1
+    arrow.Font = Enum.Font.Gotham
+    arrow.Text = "▼"
+    arrow.TextColor3 = theme.TextDim
+    arrow.TextSize = 10
+    arrow.Parent = dropdownBtn
+    
+    local open = false
+    local selected = default
+    
+    dropdownBtn.MouseButton1Click:Connect(function()
+        -- Simple dropdown - in production would show options
+        -- For now, cycle through options
+        local currentIndex = table.find(options, selected) or 1
+        local nextIndex = currentIndex % #options + 1
+        selected = options[nextIndex]
+        dropdownBtn.Text = "  "..selected
+        callback(selected)
+    end)
+    
+    return container
+end
+
+-- ===================================================================
+-- CREATE PAGES
+-- ===================================================================
+local aimbotPage = createTab("Aimbot", "")
+local weaponPage = createTab("Weapon", "")
+local visualsPage = createTab("Visuals", "")
+local miscPage = createTab("Misc", "")
+
+-- AIMBOT PAGE
+local saimToggle = createToggle(aimbotPage, "Silent Aim", WeaponSystem.Features.SilentAim.Enabled, function(v)
+    WeaponSystem.Features.SilentAim.Enabled = v
+end, 1)
+
+local fovSlider = createSlider(aimbotPage, "FOV Radius", 50, 500, WeaponSystem.Features.SilentAim.FOV, function(v)
+    WeaponSystem.Features.SilentAim.FOV = v
+end, 2)
+
+local partDropdown = createDropdown(aimbotPage, "Target Part", {"Head", "HumanoidRootPart", "Torso", "UpperTorso"}, WeaponSystem.Features.SilentAim.TargetPart, function(v)
+    WeaponSystem.Features.SilentAim.TargetPart = v
+end, 3)
+
+local showFovToggle = createToggle(aimbotPage, "Show FOV Circle", WeaponSystem.Features.SilentAim.ShowFOV, function(v)
+    WeaponSystem.Features.SilentAim.ShowFOV = v
+end, 4)
+
+local visCheckToggle = createToggle(aimbotPage, "Visibility Check", WeaponSystem.Features.SilentAim.VisibleCheck, function(v)
+    WeaponSystem.Features.SilentAim.VisibleCheck = v
+end, 5)
+
+local teamCheckToggle = createToggle(aimbotPage, "Team Check", WeaponSystem.Features.SilentAim.TeamCheck, function(v)
+    WeaponSystem.Features.SilentAim.TeamCheck = v
+end, 6)
+
+-- WEAPON PAGE
+local rapidToggle = createToggle(weaponPage, "Rapid Fire", WeaponSystem.Features.RapidFire.Enabled, function(v)
+    WeaponSystem.Features.RapidFire.Enabled = v
+end, 1)
+
+local rapidSlider = createSlider(weaponPage, "Fire Rate Multiplier", 1, 10, WeaponSystem.Features.RapidFire.Multiplier, function(v)
+    WeaponSystem.Features.RapidFire.Multiplier = v
+end, 2)
+
+local noSpreadToggle = createToggle(weaponPage, "No Spread", WeaponSystem.Features.NoSpread.Enabled, function(v)
+    WeaponSystem.Features.NoSpread.Enabled = v
+end, 3)
+
+local noRecoilToggle = createToggle(weaponPage, "No Recoil", WeaponSystem.Features.NoSpread.NoRecoil, function(v)
+    WeaponSystem.Features.NoSpread.NoRecoil = v
+end, 4)
+
+local instaReloadToggle = createToggle(weaponPage, "Instant Reload", WeaponSystem.Features.RapidFire.InstantReload, function(v)
+    WeaponSystem.Features.RapidFire.InstantReload = v
+end, 5)
+
+local autoModeToggle = createToggle(weaponPage, "Force Automatic", WeaponSystem.Features.Misc.AutomaticMode, function(v)
+    WeaponSystem.Features.Misc.AutomaticMode = v
+end, 6)
+
+-- VISUALS PAGE
+local fovColorSlider = createSlider(visualsPage, "FOV Red", 0, 255, 219, function(v)
+    WeaponSystem.Features.SilentAim.Color = Color3.fromRGB(v, WeaponSystem.Features.SilentAim.Color.G * 255, WeaponSystem.Features.SilentAim.Color.B * 255)
+end, 1)
+
+local fovGreenSlider = createSlider(visualsPage, "FOV Green", 0, 255, 79, function(v)
+    WeaponSystem.Features.SilentAim.Color = Color3.fromRGB(WeaponSystem.Features.SilentAim.Color.R * 255, v, WeaponSystem.Features.SilentAim.Color.B * 255)
+end, 2)
+
+local fovBlueSlider = createSlider(visualsPage, "FOV Blue", 0, 255, 57, function(v)
+    WeaponSystem.Features.SilentAim.Color = Color3.fromRGB(WeaponSystem.Features.SilentAim.Color.R * 255, WeaponSystem.Features.SilentAim.Color.G * 255, v)
+end, 3)
+
+-- MISC PAGE
+local infAmmoToggle = createToggle(miscPage, "Infinite Ammo", WeaponSystem.Features.Misc.InfiniteAmmo, function(v)
+    WeaponSystem.Features.Misc.InfiniteAmmo = v
+end, 1)
+
+local dmgSlider = createSlider(miscPage, "Damage Multiplier", 1, 10, WeaponSystem.Features.Misc.DamageMultiplier, function(v)
+    WeaponSystem.Features.Misc.DamageMultiplier = v
+end, 2)
+
+-- Set default tab
+tabButtons["Aimbot"].Button.TextColor3 = theme.Text
+tabButtons["Aimbot"].Button.BorderColor3 = theme.Accent
+tabButtons["Aimbot"].Indicator.Visible = true
+aimbotPage.Visible = true
+
+print("✓ GUI Loaded - Press F9 to toggle")
