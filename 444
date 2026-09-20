@@ -1,0 +1,355 @@
+-- Weapon System Core
+-- Handles all modifications to the gun system
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- Wait for game systems
+local Overture = ReplicatedStorage:WaitForChild("Codebase"):WaitForChild("Packages"):WaitForChild("Overture")
+local GunClass = require(Overture:LoadLibrary("GunClass"))
+local BulletServicePath = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Services"):WaitForChild("BulletService")
+
+-- ===================================================================
+-- SILENT AIM SYSTEM
+-- ===================================================================
+local SilentAim = {
+    FOV = Drawing.new("Circle"),
+    Target = nil,
+    HeadCache = {},
+    HeadSet = {}
+}
+
+-- Setup FOV Circle
+SilentAim.FOV.Filled = false
+SilentAim.FOV.NumSides = 64
+SilentAim.FOV.Thickness = 1.5
+SilentAim.FOV.Visible = false
+
+-- Cache heads for performance
+local function addHead(part)
+    if part:IsA("BasePart") and (part.Name == "Head" or part.Name == "HumanoidRootPart") then
+        local parent = part.Parent
+        if parent and parent:IsA("Model") and parent:FindFirstChild("Humanoid") then
+            if not SilentAim.HeadSet[part] then
+                SilentAim.HeadSet[part] = true
+                table.insert(SilentAim.HeadCache, part)
+            end
+        end
+    end
+end
+
+local function removeHead(part)
+    if SilentAim.HeadSet[part] then
+        SilentAim.HeadSet[part] = nil
+        for i = #SilentAim.HeadCache, 1, -1 do
+            if SilentAim.HeadCache[i] == part then
+                table.remove(SilentAim.HeadCache, i)
+                break
+            end
+        end
+    end
+end
+
+-- Populate cache
+for _, desc in ipairs(Workspace:GetDescendants()) do
+    addHead(desc)
+end
+
+Workspace.DescendantAdded:Connect(addHead)
+Workspace.DescendantRemoving:Connect(removeHead)
+
+-- Visibility check
+local function isVisible(targetPart)
+    if not WeaponSystem.Features.SilentAim.VisibleCheck then return true end
+    
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin).Unit * 1000
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    
+    local result = Workspace:Raycast(origin, direction, raycastParams)
+    
+    if result then
+        local hitModel = result.Instance:FindFirstAncestorOfClass("Model")
+        if hitModel and hitModel:FindFirstChild("Humanoid") then
+            return hitModel == targetPart.Parent
+        end
+        return false
+    end
+    
+    return true
+end
+
+-- Team check
+local function isEnemy(character)
+    if not WeaponSystem.Features.SilentAim.TeamCheck then return true end
+    
+    local player = Players:GetPlayerFromCharacter(character)
+    if not player then return false end
+    
+    return player.Team ~= LocalPlayer.Team
+end
+
+-- Get target
+function SilentAim:GetTarget()
+    local config = WeaponSystem.Features.SilentAim
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    
+    local closestDist = math.huge
+    local target = nil
+    
+    for i = #self.HeadCache, 1, -1 do
+        local part = self.HeadCache[i]
+        if not part or not part.Parent then
+            table.remove(self.HeadCache, i)
+            self.HeadSet[part] = nil
+            continue
+        end
+        
+        local character = part.Parent
+        if character == LocalPlayer.Character then continue end
+        if not isEnemy(character) then continue end
+        
+        -- Check if correct part
+        if part.Name ~= config.TargetPart then
+            -- Fallback to HRP if head missing
+            if config.TargetPart == "Head" and not part.Parent:FindFirstChild("Head") then
+                part = part.Parent:FindFirstChild("HumanoidRootPart")
+                if not part then continue end
+            else
+                continue
+            end
+        end
+        
+        local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
+        if not onScreen or pos.Z <= 0 then continue end
+        
+        local dist = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
+        if dist > config.FOV then continue end
+        
+        if not isVisible(part) then continue end
+        
+        if dist < closestDist then
+            closestDist = dist
+            target = part
+        end
+    end
+    
+    return target
+end
+
+-- Update FOV circle
+RunService.RenderStepped:Connect(function()
+    local config = WeaponSystem.Features.SilentAim
+    
+    SilentAim.FOV.Visible = config.Enabled and config.ShowFOV
+    SilentAim.FOV.Radius = config.FOV
+    SilentAim.FOV.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    SilentAim.FOV.Color = config.Color
+    SilentAim.FOV.Thickness = config.Thickness
+    
+    if config.Enabled then
+        SilentAim.Target = SilentAim:GetTarget()
+    else
+        SilentAim.Target = nil
+    end
+end)
+
+-- ===================================================================
+-- GUN SYSTEM MODIFICATIONS
+-- ===================================================================
+
+-- Hook BulletService
+local success, BulletService = pcall(function()
+    return require(BulletServicePath)
+end)
+
+if success and BulletService then
+    local oldDischarge = hookfunction(BulletService.Discharge, newcclosure(function(self, originCFrame, ...)
+        if WeaponSystem.Features.SilentAim.Enabled and SilentAim.Target then
+            local targetPos = SilentAim.Target.Position
+            
+            -- Prediction if needed
+            if WeaponSystem.Features.SilentAim.Prediction then
+                local velocity = SilentAim.Target.AssemblyLinearVelocity or Vector3.new()
+                targetPos = targetPos + (velocity * 0.05)
+            end
+            
+            originCFrame = CFrame.new(originCFrame.Position, targetPos)
+        end
+        
+        -- No spread modification
+        if WeaponSystem.Features.NoSpread.Enabled then
+            -- Remove random spread from origin
+            local args = {...}
+            if args[1] and typeof(args[1]) == "Vector3" then
+                args[1] = originCFrame.LookVector * 1000 -- Perfect direction
+            end
+            return oldDischarge(self, originCFrame, unpack(args))
+        end
+        
+        return oldDischarge(self, originCFrame, ...)
+    end))
+    
+    print("✓ BulletService hooked")
+end
+
+-- Hook GunClass
+local oldGunNew = GunClass.new
+GunClass.new = newcclosure(function(tool, ...)
+    local gun = oldGunNew(tool, ...)
+    
+    -- Store original values
+    local originalRPM = gun.Config.RPM
+    local originalSpreadStart = gun.SpreadStart
+    local originalSpreadMax = gun.SpreadMax
+    local originalSpreadIncrease = gun.SpreadIncrease
+    local originalRecoil = table.clone(gun.Config.Recoil)
+    
+    -- Rapid Fire
+    spawn(function()
+        while gun and gun.Tool and gun.Tool.Parent do
+            if WeaponSystem.Features.RapidFire.Enabled then
+                gun.Config.RPM = originalRPM * WeaponSystem.Features.RapidFire.Multiplier
+            else
+                gun.Config.RPM = originalRPM
+            end
+            RunService.Heartbeat:Wait()
+        end
+    end)
+    
+    -- No Spread
+    spawn(function()
+        while gun and gun.Tool and gun.Tool.Parent do
+            if WeaponSystem.Features.NoSpread.Enabled then
+                gun.SpreadStart = 0
+                gun.SpreadMax = {
+                    StillStanding = 0,
+                    StillCrouching = 0,
+                    MoveStanding = 0,
+                    MoveCrouching = 0
+                }
+                gun.SpreadIncrease = 0
+                
+                if WeaponSystem.Features.NoSpread.NoRecoil then
+                    gun.Config.Recoil = {
+                        Vertical = 0,
+                        Horizontal = 0,
+                        Depth = 0
+                    }
+                end
+            else
+                gun.SpreadStart = originalSpreadStart
+                gun.SpreadMax = originalSpreadMax
+                gun.SpreadIncrease = originalSpreadIncrease
+                gun.Config.Recoil = originalRecoil
+            end
+            RunService.Heartbeat:Wait()
+        end
+    end)
+    
+    -- Force Automatic
+    spawn(function()
+        while gun and gun.Tool and gun.Tool.Parent do
+            if WeaponSystem.Features.Misc.AutomaticMode then
+                gun.FireMode = "Auto"
+                gun.Config.FireModes = {"Auto"}
+            end
+            RunService.Heartbeat:Wait()
+        end
+    end)
+    
+    -- Infinite Ammo
+    spawn(function()
+        while gun and gun.Tool and gun.Tool.Parent do
+            if WeaponSystem.Features.Misc.InfiniteAmmo then
+                if gun.Ammo then
+                    gun.Ammo.Value = 999
+                end
+                if gun.Spare then
+                    gun.Spare.Value = 999
+                end
+            end
+            RunService.Heartbeat:Wait()
+        end
+    end)
+    
+    -- Instant Reload
+    local oldReload = gun.Reload
+    gun.Reload = newcclosure(function(self, ...)
+        if WeaponSystem.Features.RapidFire.InstantReload then
+            if self.Ammo and self.Ammo:GetAttribute("Max") then
+                self.Ammo.Value = self.Ammo:GetAttribute("Max")
+                return
+            end
+        end
+        return oldReload(self, ...)
+    end)
+    
+    -- Damage Multiplier (server-side dependent but we try)
+    local oldFire = gun.Fire
+    gun.Fire = newcclosure(function(self, ...)
+        if WeaponSystem.Features.Misc.DamageMultiplier > 1 then
+            -- Store multiplier for bullet data
+            self._DamageMultiplier = WeaponSystem.Features.Misc.DamageMultiplier
+        end
+        return oldFire(self, ...)
+    end)
+    
+    print("✓ GunClass hooked for", tool.Name)
+    return gun
+end)
+
+-- ===================================================================
+-- ESP & VISUALS (Optional)
+-- ===================================================================
+local ESP = {
+    Enabled = false,
+    Boxes = {},
+    Names = {}
+}
+
+function ESP:Toggle(enabled)
+    self.Enabled = enabled
+end
+
+-- ===================================================================
+-- KEYBINDS
+-- ===================================================================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    -- Toggle Silent Aim
+    if input.KeyCode == Enum.KeyCode.LeftShift then
+        WeaponSystem.Features.SilentAim.Enabled = not WeaponSystem.Features.SilentAim.Enabled
+        print("Silent Aim:", WeaponSystem.Features.SilentAim.Enabled)
+    end
+    
+    -- Quick reload
+    if input.KeyCode == Enum.KeyCode.R then
+        local character = LocalPlayer.Character
+        if character then
+            local tool = character:FindFirstChildOfClass("Tool")
+            if tool then
+                local gun = GunClass.new(tool)
+                if gun and gun.Ammo then
+                    gun.Ammo.Value = 999
+                end
+            end
+        end
+    end
+end)
+
+print("✓ Weapon System Core Loaded")
+print("Controls:")
+print("  F9 - Toggle GUI")
+print("  LeftShift - Toggle Silent Aim")
+print("  R - Quick Reload (sets ammo to 999)")
