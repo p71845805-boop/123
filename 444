@@ -4048,11 +4048,13 @@ function library:init()
                                     backspaceToken = backspaceToken + 1;
                                     local token = backspaceToken;
                                     task.spawn(function()
-                                        task.wait(.3);
+                                        local DELETE_START_DELAY = .45; -- how long to hold before repeating
+                                        local DELETE_INTERVAL = .09;    -- seconds per deleted character while held
+                                        task.wait(DELETE_START_DELAY);
                                         while token == backspaceToken and box.focused and inputservice:IsKeyDown(deleteKey) and #input > 0 do
                                             input = input:sub(1,-2);
                                             self.objects.inputText.Text = input;
-                                            task.wait(.03);
+                                            task.wait(DELETE_INTERVAL);
                                         end
                                     end)
                                 end
