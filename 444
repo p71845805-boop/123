@@ -6,6 +6,48 @@ local printconsole = printconsole or function(msg) warn(tostring(msg)) end
 local b64decode = (crypt and crypt.base64decode) or (crypt and crypt.base64 and crypt.base64.decode) or base64_decode or (base64 and (base64.decode or base64.decode)) or function(s) return s end
 local httprequest = (syn and syn.request) or (http and http.request) or http_request or request
 
+
+-- // Built-in Signal implementation (no external dependency)
+local Signal = {}
+Signal.__index = Signal
+function Signal.new()
+    return setmetatable({_handlers = {}}, Signal)
+end
+function Signal:Connect(fn)
+    local conn = {Connected = true, _fn = fn, _signal = self}
+    function conn:Disconnect()
+        if not self.Connected then return end
+        self.Connected = false
+        local h = self._signal._handlers
+        local i = table.find(h, self)
+        if i then table.remove(h, i) end
+    end
+    conn.disconnect = conn.Disconnect
+    table.insert(self._handlers, conn)
+    return conn
+end
+Signal.connect = Signal.Connect
+function Signal:Fire(...)
+    local copy = table.clone(self._handlers)
+    for _, conn in ipairs(copy) do
+        if conn.Connected then
+            task.spawn(conn._fn, ...)
+        end
+    end
+end
+function Signal:Wait()
+    local co = coroutine.running()
+    local conn
+    conn = self:Connect(function(...)
+        conn:Disconnect()
+        task.spawn(co, ...)
+    end)
+    return coroutine.yield()
+end
+function Signal:Destroy()
+    table.clear(self._handlers)
+end
+
 if genv.library ~= nil then
     pcall(function() genv.library:Unload() end)
     genv.library = nil
@@ -66,7 +108,7 @@ local library = {
         ['colortrans'] = 'https://raw.githubusercontent.com/portallol/luna/main/modules/trans.png';
     };
     numberStrings = {['Zero'] = 0, ['One'] = 1, ['Two'] = 2, ['Three'] = 3, ['Four'] = 4, ['Five'] = 5, ['Six'] = 6, ['Seven'] = 7, ['Eight'] = 8, ['Nine'] = 9};
-    signal = loadstring(game:HttpGet('https://raw.githubusercontent.com/drillygzzly/Other/main/1414'))();
+    signal = Signal;
     open = false;
     opening = false;
     hasInit = false;
@@ -703,10 +745,17 @@ function library:init()
     end
 
     for i,v in next, self.images do
-        if not isfile(self.cheatname..'/assets/'..i..'.oh') then
-            writefile(self.cheatname..'/assets/'..i..'.oh', game:HttpGet(v))
-        end
-        self.images[i] = readfile(self.cheatname..'/assets/'..i..'.oh');
+        local path = self.cheatname..'/assets/'..i..'.oh'
+        pcall(function()
+            if not isfile(path) then
+                local data = game:HttpGet(v)
+                if data and #data > 0 and data:sub(1,4) ~= '404:' then
+                    writefile(path, data)
+                end
+            end
+        end)
+        local ok, data = pcall(readfile, path)
+        self.images[i] = ok and data or ''
     end
 
     self.cursor1 = utility:Draw('Triangle', {Filled = true, Color = fromrgb(255,255,255), ZIndex = self.zindexOrder.cursor});
@@ -2174,6 +2223,18 @@ function library:init()
                             Parent = objs.border1;
                         })
 
+                        objs.checkmarks = {};
+                        for _, p in next, {{1,4},{2,5},{3,6},{4,5},{5,4},{6,3},{7,2}} do
+                            table.insert(objs.checkmarks, utility:Draw('Square', {
+                                Size = newUDim2(0,1,0,1);
+                                Position = newUDim2(0,p[1],0,p[2]);
+                                Color = c3new(1,1,1);
+                                ZIndex = z+6;
+                                Visible = false;
+                                Parent = objs.background;
+                            }))
+                        end
+
                         objs.text = utility:Draw('Text', {
                             Position = newUDim2(0,19,0,1);
                             ThemeColor = 'Option Text 3';
@@ -2210,6 +2271,9 @@ function library:init()
                             self.objects.text.ThemeColor = bool and (self.risky and 'Risky Text Enabled' or 'Option Text 1') or (self.risky and 'Risky Text' or 'Option Text 3');
                             self.objects.background.ThemeColor = bool and 'Accent' or 'Option Background';
                             self.objects.background.ThemeColorOffset = bool and -55 or 0
+                            for _, mark in next, self.objects.checkmarks do
+                                mark.Visible = bool
+                            end
 
                             if not nocallback then
                                 self.callback(bool);
