@@ -4044,14 +4044,15 @@ function library:init()
                                     -- tap: delete one character
                                     input = input:sub(1,-2);
                                     self.objects.inputText.Text = input;
-                                    -- hold: after a short delay the whole text is erased
+                                    -- hold: after a short delay keep deleting one character at a time until released
                                     backspaceToken = backspaceToken + 1;
                                     local token = backspaceToken;
                                     task.spawn(function()
                                         task.wait(.3);
-                                        if token == backspaceToken and box.focused and inputservice:IsKeyDown(deleteKey) then
-                                            input = '';
+                                        while token == backspaceToken and box.focused and inputservice:IsKeyDown(deleteKey) and #input > 0 do
+                                            input = input:sub(1,-2);
                                             self.objects.inputText.Text = input;
+                                            task.wait(.03);
                                         end
                                     end)
                                 end
