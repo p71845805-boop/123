@@ -1766,6 +1766,27 @@ function library:init()
                     draggingTrans = false;
                 end)
 
+                utility:Connection(button1down, function()
+                    local selected = window.colorpicker.selected
+                    if not library.open or selected == nil then return end
+
+                    local hoverObj = utility:GetHoverObject()
+                    local pickerObj = objs.background.Object
+                    local ownHolder = selected.objects.holder.Object
+
+                    -- walk up the parent chain: ignore clicks inside the picker or on the swatch that opened it
+                    local obj = hoverObj
+                    while obj do
+                        if obj == pickerObj or obj == ownHolder then
+                            return
+                        end
+                        local d = library.drawings[obj]
+                        obj = d and d.Parent and d.Parent.Object or nil
+                    end
+
+                    selected:SetOpen(false)
+                end)
+
             end
 
             function window.colorpicker:Visualize(c3, a)
@@ -3974,6 +3995,7 @@ function library:init()
 
                     local c
                     local input = box.input;
+                    local backspaceToken = 0;
                     function box:CaptureFocus(clear)
                         box.focused = true
 
@@ -3990,8 +4012,26 @@ function library:init()
                                 self.objects.inputText.Text = input;
                                 box:ReleaseFocus();
                             elseif inp.KeyCode == Enum.KeyCode.Backspace then
-                                input = input:sub(1,-2);
-                                self.objects.inputText.Text = input;
+                                if inputservice:IsKeyDown(Enum.KeyCode.LeftControl) then
+                                    input = '';
+                                    self.objects.inputText.Text = input;
+                                else
+                                    input = input:sub(1,-2);
+                                    self.objects.inputText.Text = input;
+                                    -- hold backspace: after a short delay delete repeatedly, faster the longer it's held
+                                    backspaceToken = backspaceToken + 1;
+                                    local token = backspaceToken;
+                                    task.spawn(function()
+                                        task.wait(.35);
+                                        local delay = .06;
+                                        while token == backspaceToken and box.focused and inputservice:IsKeyDown(Enum.KeyCode.Backspace) and #input > 0 do
+                                            input = input:sub(1,-2);
+                                            self.objects.inputText.Text = input;
+                                            task.wait(delay);
+                                            delay = math.max(.01, delay * .9);
+                                        end
+                                    end)
+                                end
                             elseif #inp.KeyCode.Name == 1 or table.find(whitelistedBoxKeys, inp.KeyCode) or inp.KeyCode.Name == 'Space' or inp.KeyCode.Name == 'Minus' or inp.KeyCode.Name == 'Equals' or inp.KeyCode.Name == 'Backquote' then
                                 local wlIdx = table.find(whitelistedBoxKeys, inp.KeyCode)
                                 local keyString = inp.KeyCode.Name == 'Space' and ' ' or inp.KeyCode.Name == 'Minus' and '_' or inp.KeyCode.Name == 'Equals' and '+' or inp.KeyCode.Name == 'Backquote' and '~' or wlIdx ~= nil and tostring(wlIdx-1) or inp.KeyCode.Name
@@ -4036,6 +4076,7 @@ function library:init()
 
                     function box:ReleaseFocus(apply)
                         box.focused = false;
+                        backspaceToken = backspaceToken + 1;
                         self.objects.inputText.ThemeColor = 'Option Text 2';
                         if apply then
                             box:SetInput(input);
