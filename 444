@@ -1117,6 +1117,42 @@ function library:init()
                 Parent = objs.background;
             });
 
+            -- // Drag detector (drag the indicator by its header with the mouse)
+            objs.dragdetector = utility:Draw('Square', {
+                Size = newUDim2(1,0,1,0);
+                Parent = objs.background;
+                Transparency = 0;
+                ZIndex = z+3;
+            })
+
+            local dragging, mouseStart, objStart = false, nil, nil;
+
+            utility:Connection(objs.dragdetector.MouseButton1Down, function(pos)
+                dragging = true;
+                mouseStart = pos;
+                objStart = objs.background.Object.Position;
+            end)
+
+            utility:Connection(button1up, function()
+                dragging = false;
+            end)
+
+            utility:Connection(mousemove, function(pos)
+                if dragging then
+                    if library.open then
+                        local delta = pos - mouseStart;
+                        local size = objs.background.Object.Size;
+                        local screensize = workspace.CurrentCamera.ViewportSize;
+                        local x = clamp(objStart.X + delta.X, 0, math.max(0, screensize.X - size.X));
+                        local y = clamp(objStart.Y + delta.Y, 0, math.max(0, screensize.Y - size.Y));
+                        indicator.position = newUDim2(0, x, 0, y);
+                        objs.background.Position = indicator.position;
+                    else
+                        dragging = false;
+                    end
+                end
+            end)
+
         end
         --------------------
 
@@ -1512,7 +1548,7 @@ function library:init()
 
                 objs.sat1 = utility:Draw('Image', {
                     Size = newUDim2(1,0,1,0);
-                    Data = b64decode("iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAQAAADURZm+AAAImUlEQVR42u3TBfP4gwEH4L+enmG6xkxOt9NO1yZPnTrdTnPqxGlO2+RNnJre9GHTNt3d3c3Hx/d+r8I997yGZ1RG1WiD0QdjDMYcMVbGHjHO4Dc17mC8Gn8wQSasiQYT129rksHvatJMVpMPfl9TZMqaqqbONCOmzXQ1fc2QGWum/KFmrlnyx5q1/pTZavaaI3PWXDV3/lzzZN6ar+bPArVgLZSFa5FaNIvV4lmilqylsnQtU8tmuVq+VsiKtVKtnFVq1axWq9caWTNrZe1aJ3+pv2bdrJf1a4NsWBvVxtmkNq3NsnltUVtmq9q6tsm2tV22rx2yY3bKzrVL7Zrdsnv2qD2zV+1d+2Tf2i/754AcWAfl4DqkDs1hdXgdkSPrqBxdx9SxOa6OrxNyYk7KyXVKTq3T6vScUWfmrJydc+rc/K3+nvNyfi6oC+uiXFz/yCV1aV2Wy+uKujJX1dV1Tf6Za3NdXZ8b6sbcVDfnX/l3bqlb67bcXnfUnbmr7q57cm/9J/+t++r+PFAP1kN5uB6pR/O/+n8eq8friTxZT9XTeaaerefyfL1QL+alejmv1Kv1Wl6vNwZv1lv1dt6pd/PeiPfzQX1YHw0+rk/y6YjP8nl9Mfiyvhp8Xd8Mvh18V98Pfhj8OOKnX4wSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEunXFulnvHZyHbpMefAAAAAASUVORK5CYII=");
+                    Data = b64decode("iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAQAAADURZm+AAAImUlEQVR42u3TBfP4gwEH4L+enmG6xkxOt9NO1yZPnTrdTnPqxGlO2+RNnJre9GHTNt3d3c3Hx/d+r8I997yGZ1RG1WiD0QdjDMYcMVbGHjHO4Dc17mC8Gn8wQSasiQYT129rksHvatJMVpMPfl9TZMqaqqbONCOmzXQ1fc2QGWum/KFmrlnyx5q1/pTZavaaI3PWXDV3/lzzZN6ar+bPArVgLZSFa5FaNIvV4lmilqylsnQtU8tmuVq+VsiKtVKtnFVq1axWq9caWTNrZe1aJ3+pv2bdrJf1a4NsWBvVxtmkNq3NsnltUVtmq9q6tsm2tV22rx2yY3bKzrVL7Zrdsnv2qD2zV+1d+2Tf2i/754AcWAfl4DqkDs1hdXgdkSPrqBxdx9SxOa6OrxNyYk7KyXVKTq3T6vScUWfmrJydc+rc/K3+nvNyfi6oC+uiXFz/yCV1aV2Wy+uKujJX1dV1Tf6Za3NdXZ8b6sbcVDfnX/l3bqlb67bcXnfUnbmr7q57cm/9J/+t++r+PFAP1kN5uB6pR/O/+n8eq8friTxZT9XTeaaerefyfL1QL+alejmv1Kv1Wl6vNwZv1lv1dt6pd/PeiPfzQX1YHw0+rk/y6YjP8nl9Mfiyvhp8Xd8Mvh18V98Pfhj8OOKnX4wSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEunXFulnvHZyHbpMefAAAAAASUVORK5CYII=");
                     ZIndex = z+3;
                     Parent = objs.mainColor;
                 })
@@ -4729,8 +4765,7 @@ function library:init()
                 {'00:00:00', true},
                 {'M, D, Y', true},
             };
-            lock = 'custom';
-            position = newUDim2(0,0,0,0);
+            position = newUDim2(0,15,0,15);
             refreshrate = 25;
         }
 
@@ -4759,14 +4794,10 @@ function library:init()
                 local size = self.objects.background.Object.Size;
                 local screensize = workspace.CurrentCamera.ViewportSize;
 
-                self.position = (
-                    self.lock == 'Top Right' and newUDim2(0, screensize.X - size.X - 15, 0, 15) or
-                    self.lock == 'Top Left' and newUDim2(0, 15, 0, 15) or
-                    self.lock == 'Bottom Right' and newUDim2(0, screensize.X - size.X - 15, 0, screensize.Y - size.Y - 15) or
-                    self.lock == 'Bottom Left' and newUDim2(0, 15, 0, screensize.Y - size.Y - 15) or
-                    self.lock == 'Top' and newUDim2(0, screensize.X / 2 - size.X / 2, 0, 15) or
-                    newUDim2(library.flags.watermark_x / 100, 0, library.flags.watermark_y / 100, 0)
-                )
+                -- position is controlled by dragging with the mouse; keep it on screen
+                local x = clamp(self.position.X.Offset, 0, math.max(0, screensize.X - size.X))
+                local y = clamp(self.position.Y.Offset, 0, math.max(0, screensize.Y - size.Y))
+                self.position = newUDim2(0, x, 0, y)
 
                 self.objects.background.Position = self.position
             end
@@ -4819,6 +4850,38 @@ function library:init()
                 Parent = objs.background;
             })
 
+            -- // Drag detector (drag the watermark with the mouse)
+            objs.dragdetector = utility:Draw('Square', {
+                Size = newUDim2(1,0,1,0);
+                Parent = objs.background;
+                Transparency = 0;
+                ZIndex = z+3;
+            })
+
+            local wmDragging, wmMouseStart, wmObjStart = false, nil, nil;
+
+            utility:Connection(objs.dragdetector.MouseButton1Down, function(pos)
+                wmDragging = true;
+                wmMouseStart = pos;
+                wmObjStart = objs.background.Object.Position;
+            end)
+
+            utility:Connection(button1up, function()
+                wmDragging = false;
+            end)
+
+            utility:Connection(mousemove, function(pos)
+                if wmDragging then
+                    if library.open then
+                        local delta = pos - wmMouseStart;
+                        self.watermark.position = newUDim2(0, wmObjStart.X + delta.X, 0, wmObjStart.Y + delta.Y);
+                        self.watermark:Update();
+                    else
+                        wmDragging = false;
+                    end
+                end
+            end)
+
         end
     end
 
@@ -4835,7 +4898,7 @@ function library:init()
         end
     end)
 
-    self.keyIndicator = self.NewIndicator({title = 'Keybinds', pos = newUDim2(0,15,0,325), enabled = true});
+    self.keyIndicator = self.NewIndicator({title = 'Keybinds', position = newUDim2(0,15,0,325), enabled = true});
     
     self.targetIndicator = self.NewIndicator({title = 'Target Info', pos = newUDim2(0,15,0,350), enabled = false});
     self.targetName = self.targetIndicator:AddValue({key = 'Name     :', value = 'nil'})
@@ -4944,20 +5007,12 @@ function library:CreateSettingsTab(menu)
 
     mainSection:AddSeparator({text = 'Indicators'});
 
+    -- Watermark and keybind list can be moved with the mouse (menu must be open), so only the on/off toggles remain
     mainSection:AddToggle({text = 'Watermark', flag = 'watermark_enabled', state = true,});
-
-    mainSection:AddSlider({text = 'Custom X', flag = 'watermark_x', suffix = '%', min = 0, max = 100, increment = .1, value = 6});
-    mainSection:AddSlider({text = 'Custom Y', flag = 'watermark_y', suffix = '%', min = 0, max = 100, increment = .1, value = 1});
 
     mainSection:AddToggle({text = 'Keybinds', flag = 'keybind_indicator', state = true, callback = function(bool)
         library.keyIndicator:SetEnabled(bool);
     end})
-    mainSection:AddSlider({text = 'Position X', flag = 'keybind_indicator_x', min = 0, max = 100, increment = .1, value = .5, callback = function()
-        library.keyIndicator:SetPosition(newUDim2(library.flags.keybind_indicator_x / 100, 0, library.flags.keybind_indicator_y / 100, 0));    
-    end});
-    mainSection:AddSlider({text = 'Position Y', flag = 'keybind_indicator_y', min = 0, max = 100, increment = .1, value = 30, callback = function()
-        library.keyIndicator:SetPosition(newUDim2(library.flags.keybind_indicator_x / 100, 0, library.flags.keybind_indicator_y / 100, 0));    
-    end});
 
 
 
