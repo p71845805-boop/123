@@ -1512,7 +1512,7 @@ function library:init()
 
                 objs.sat1 = utility:Draw('Image', {
                     Size = newUDim2(1,0,1,0);
-                    Data = b64decode("iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAQAAADURZm+AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQflBwwSLzK3wl3KAAADrElEQVR42u3TORLCMBBFwT+6/50hMqXSZgonBN0BWCDGYPwqeSWVZPWYVHd0Pc5H86v9areu4Sz9u7XZXT/vvtZtu6dtJtYw525iGya05afnWW17ltPE8fzfTZy/yf3vmCes59xf0Sf/42l3lnvGOyyH+y/bo/X689wCPCYkEBIICYQECAmEBEICIQFCAiGBkEBIgJBASCAkEBIgJBASCAmEBAgJhARCAiEBQgIhgZAAIYGQQEggJEBIICQQEggJEBIICYQEQgKEBEICIYGQACGBkEBIICRASCAkEBIICRASCAmEBAgJhARCAiEBQgIhgZBASICQQEggJBASICQQEggJhAQICYQEQgIhAUICIYGQQEguAQgJhARCAoQEQgIhgZAAIYGQQEggJEBIICQQEggJEBIICYQEQgKEBEICIYGQACGBkEBIgJBASCAkEBIgJBASCAmEBAgJhARCAiEBQgIhgZBASICQQEggJBASICQQEggJhAQICYQEQgKEBEICIYGQACGBkEBIICRASCAkEBIICRASCAmEBEIChARCAiGBkAAhgZBASCAkQEggJBASICQQEggJhAQICYQEQgIhAUICIYGQQEiAkEBIICQQEiAkEBIICYQECAmEBEIChARCAiGBkAAhgZBASCAkQEggJBASCAkQEggJhARCAoQEQgIhgZAAIYGQQEggJEBIICQQEiAkEBIICYQECAmEBEICIQFCAiGBkEBIgJBASCAkEBIgJBASCAmEBAgJhARCAiEBQgIhgZAAIYGQQEggJEBIICQQEggJEBIICYQEQgKEBEICIYGQACGBkEBIICRASCAkEBIgJBASCAmEBAgJhARCAiEBQgIhgZBASICQQEggJBASICQQEggJhAQICYQEQgIhAUICIYGQACGBkEBIICRASCAkEBIICRASCAmEBEIChARCAiGBkAAhgZBASCAkQEggJBASCAkQEggJhAQICYQEQgIhAUICIYGQQEiAkEBIICQQEiAkEBIICYQECAmEBEICIQFCAiGBkEBILgEICYQEQgKEBEICIYGQACGBkEBIICRASCAkEBIICRASCAmEBEIChARCAiGBkAAhgZBASICQQEggJBASICQQEggJhAQICYQEQgIhAUICIYGQQEiAkEBIICQQEiAkEBIICYQECAmEBEIChARCAiGBkAAhgZBASCAkQEggJBASCAkQEggJhARCAoQEQgIhgZAAIYGQQEggJEBIICQQEiAkEBL8lzft9AVFFzN+ywAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0wNy0xMlQxODo0Nzo1MCswMDowMIxlM90AAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMDctMTJUMTg6NDc6NTArMDA6MDD9OIthAAAAAElFTkSuQmCC");
+                    Data = b64decode("iVBORw0KGgoAAAANSUhEUgAAAaQAAAGkCAQAAADURZm+AAAImUlEQVR42u3TBfP4gwEH4L+enmG6xkxOt9NO1yZPnTrdTnPqxGlO2+RNnJre9GHTNt3d3c3Hx/d+r8I997yGZ1RG1WiD0QdjDMYcMVbGHjHO4Dc17mC8Gn8wQSasiQYT129rksHvatJMVpMPfl9TZMqaqqbONCOmzXQ1fc2QGWum/KFmrlnyx5q1/pTZavaaI3PWXDV3/lzzZN6ar+bPArVgLZSFa5FaNIvV4lmilqylsnQtU8tmuVq+VsiKtVKtnFVq1axWq9caWTNrZe1aJ3+pv2bdrJf1a4NsWBvVxtmkNq3NsnltUVtmq9q6tsm2tV22rx2yY3bKzrVL7Zrdsnv2qD2zV+1d+2Tf2i/754AcWAfl4DqkDs1hdXgdkSPrqBxdx9SxOa6OrxNyYk7KyXVKTq3T6vScUWfmrJydc+rc/K3+nvNyfi6oC+uiXFz/yCV1aV2Wy+uKujJX1dV1Tf6Za3NdXZ8b6sbcVDfnX/l3bqlb67bcXnfUnbmr7q57cm/9J/+t++r+PFAP1kN5uB6pR/O/+n8eq8friTxZT9XTeaaerefyfL1QL+alejmv1Kv1Wl6vNwZv1lv1dt6pd/PeiPfzQX1YHw0+rk/y6YjP8nl9Mfiyvhp8Xd8Mvh18V98Pfhj8OOKnX4wSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEkkkkUQSSSSRRBJJJJFEEunXFulnvHZyHbpMefAAAAAASUVORK5CYII=");
                     ZIndex = z+3;
                     Parent = objs.mainColor;
                 })
@@ -3987,10 +3987,8 @@ function library:init()
                                     false,
                                     unpack(Enum.PlayerActions:GetEnumItems())
                                 )
-                                box:CaptureFocus(inputservice:IsKeyDown(Enum.KeyCode.LeftControl));
-                                if inputservice:IsKeyDown(Enum.KeyCode.LeftControl) then
-                                    objs.inputText.Text = '';
-                                end
+                                -- FIX: the field is no longer cleared on focus
+                                box:CaptureFocus(false);
                             end
                         end)
 
@@ -4023,6 +4021,9 @@ function library:init()
                     function box:CaptureFocus(clear)
                         box.focused = true
 
+                        -- keep the internal buffer in sync with the stored value
+                        input = box.input;
+
                         if clear then
                             input = '';
                         end
@@ -4037,27 +4038,35 @@ function library:init()
                                 box:ReleaseFocus();
                             elseif inp.KeyCode == Enum.KeyCode.Backspace or inp.KeyCode == Enum.KeyCode.Delete then
                                 local deleteKey = inp.KeyCode;
-                                if inputservice:IsKeyDown(Enum.KeyCode.LeftControl) then
-                                    input = '';
-                                    self.objects.inputText.Text = input;
-                                else
-                                    -- tap: delete one character
-                                    input = input:sub(1,-2);
-                                    self.objects.inputText.Text = input;
-                                    -- hold: after a short delay keep deleting one character at a time until released
-                                    backspaceToken = backspaceToken + 1;
-                                    local token = backspaceToken;
-                                    task.spawn(function()
-                                        local DELETE_START_DELAY = .45; -- how long to hold before repeating
-                                        local DELETE_INTERVAL = .09;    -- seconds per deleted character while held
-                                        task.wait(DELETE_START_DELAY);
-                                        while token == backspaceToken and box.focused and inputservice:IsKeyDown(deleteKey) and #input > 0 do
-                                            input = input:sub(1,-2);
-                                            self.objects.inputText.Text = input;
-                                            task.wait(DELETE_INTERVAL);
-                                        end
-                                    end)
-                                end
+
+                                -- FIX: a press removes exactly ONE character (no Ctrl = clear-all anymore)
+                                input = input:sub(1,-2);
+                                self.objects.inputText.Text = input;
+
+                                -- FIX: while held, keep removing ONE character at a time, speeding up gradually
+                                backspaceToken = backspaceToken + 1;
+                                local token = backspaceToken;
+                                task.spawn(function()
+                                    local START_DELAY   = .45; -- hold time before auto-repeat starts
+                                    local SLOW_INTERVAL = .09; -- initial repeat speed
+                                    local FAST_INTERVAL = .03; -- max repeat speed
+                                    local ACCEL_AFTER   = 12;  -- characters deleted before speeding up
+
+                                    task.wait(START_DELAY);
+
+                                    local deleted = 0;
+                                    while token == backspaceToken
+                                        and box.focused
+                                        and inputservice:IsKeyDown(deleteKey)
+                                        and #input > 0 do
+
+                                        input = input:sub(1,-2);
+                                        self.objects.inputText.Text = input;
+                                        deleted += 1;
+
+                                        task.wait(deleted >= ACCEL_AFTER and FAST_INTERVAL or SLOW_INTERVAL);
+                                    end
+                                end)
                             elseif #inp.KeyCode.Name == 1 or table.find(whitelistedBoxKeys, inp.KeyCode) or inp.KeyCode.Name == 'Space' or inp.KeyCode.Name == 'Minus' or inp.KeyCode.Name == 'Equals' or inp.KeyCode.Name == 'Backquote' then
                                 local wlIdx = table.find(whitelistedBoxKeys, inp.KeyCode)
                                 local keyString = inp.KeyCode.Name == 'Space' and ' ' or inp.KeyCode.Name == 'Minus' and '_' or inp.KeyCode.Name == 'Equals' and '+' or inp.KeyCode.Name == 'Backquote' and '~' or wlIdx ~= nil and tostring(wlIdx-1) or inp.KeyCode.Name
