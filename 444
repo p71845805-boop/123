@@ -807,6 +807,30 @@ function library:init()
                 local hoverObjData = library.drawings[hoverObj];
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     mb1down = true;
+
+                    -- // Click anywhere outside the color picker: apply color & close it
+                    for _, win in next, library.windows do
+                        local picker = win.colorpicker
+                        local selected = picker and picker.selected
+                        if selected ~= nil then
+                            local insidePanel, insideHolder = false, false
+                            local d = hoverObj and library.drawings[hoverObj] or nil
+                            while d do
+                                if d.Object == picker.objects.background.Object then
+                                    insidePanel = true
+                                end
+                                if d.Object == selected.objects.holder.Object then
+                                    insideHolder = true
+                                end
+                                d = d.Parent and library.drawings[d.Parent.Object] or nil
+                            end
+                            -- clicking the swatch itself is handled by its own toggle handler
+                            if not insidePanel and not insideHolder then
+                                selected:SetOpen(false)
+                            end
+                        end
+                    end
+
                     button1down:Fire()
                     if hoverObj and hoverObjData then
                         hoverObjData.MouseButton1Down:Fire(inputservice:GetMouseLocation())
@@ -4011,24 +4035,23 @@ function library:init()
                                 input = self.input
                                 self.objects.inputText.Text = input;
                                 box:ReleaseFocus();
-                            elseif inp.KeyCode == Enum.KeyCode.Backspace then
+                            elseif inp.KeyCode == Enum.KeyCode.Backspace or inp.KeyCode == Enum.KeyCode.Delete then
+                                local deleteKey = inp.KeyCode;
                                 if inputservice:IsKeyDown(Enum.KeyCode.LeftControl) then
                                     input = '';
                                     self.objects.inputText.Text = input;
                                 else
+                                    -- tap: delete one character
                                     input = input:sub(1,-2);
                                     self.objects.inputText.Text = input;
-                                    -- hold backspace: after a short delay delete repeatedly, faster the longer it's held
+                                    -- hold: after a short delay the whole text is erased
                                     backspaceToken = backspaceToken + 1;
                                     local token = backspaceToken;
                                     task.spawn(function()
-                                        task.wait(.35);
-                                        local delay = .06;
-                                        while token == backspaceToken and box.focused and inputservice:IsKeyDown(Enum.KeyCode.Backspace) and #input > 0 do
-                                            input = input:sub(1,-2);
+                                        task.wait(.3);
+                                        if token == backspaceToken and box.focused and inputservice:IsKeyDown(deleteKey) then
+                                            input = '';
                                             self.objects.inputText.Text = input;
-                                            task.wait(delay);
-                                            delay = math.max(.01, delay * .9);
                                         end
                                     end)
                                 end
