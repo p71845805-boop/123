@@ -1,5 +1,5 @@
 {
-  "kill": true,
+  "kill": false,
   "ban": false,
   "message": "lolkek",
   "grantitem": {
